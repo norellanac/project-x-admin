@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Login from '../organisms/Login';
 import Signup from '../organisms/Signup';
+import personImageApp from './../../../../assets/images/Main_screen_img_bg.svg';
 
 interface InitialPageProps {
   onLogin: () => void;
@@ -56,7 +57,7 @@ const InitialPage: React.FC<InitialPageProps> = ({ onLogin }) => {
         </Box>
         <Box sx={{ textAlign: 'center' }}>
           <img
-            src="src\assets\images\Main_screen_img_bg.svg"
+            src={personImageApp}
             alt="Initial screen"
             style={{
               width: '416px',
