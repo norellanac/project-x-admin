@@ -28,16 +28,15 @@ const HomePage: React.FC = () => {
         Welcome to the Home Page
       </TextAtom>
       <TextAtom variant="body" size="small">
-       {JSON.stringify(authState)}
+        {JSON.stringify(authState)}
       </TextAtom>
       <ButtonAtom
-        title='LogOut'
-        fullWidth
-        variant="filled"
+        title={t('auth.logout.title', 'Logout')}
         onClick={() => dispatch(logout())}
-        sx={{ mt: 2, height: '40px', maxWidth: '328px', textTransform: 'none' }}
+        variant="filled"
+        sx={{ ml: 1, textTransform: 'none', fontSize: 'inherit', minHeight: '40px', minWidth: '120px' }}
       >
-        {t('auth.logout.title')}
+        {t('auth.logout.title', 'Logout')}
       </ButtonAtom>
       <TextAtom variant="body" size="small">
         You can navigate to other sections using the sidebar or click on the
