@@ -20,29 +20,7 @@ export async function logger(
   device = '',
   httpRequestDetails: { method?: string; url?: string; statusCode?: number; responseTime?: number } = {}
 ) {
-  function formattedMessage(payload: any): string {
-    if (payload instanceof Error) {
-      return `Error: ${payload.message}\nStack: ${payload.stack}`;
-    }
-    switch (typeof payload) {
-      case 'string':
-        return payload;
-      case 'number':
-      case 'boolean':
-        return payload.toString();
-      case 'object':
-        if (payload === null) {
-          return 'null';
-        }
-        try {
-          return JSON.stringify(payload, null, 2);
-        } catch (error) {
-          return 'Circular reference in payload';
-        }
-      default:
-        return `Unsupported type: ${typeof payload}`;
-    }
-  }
+
 
   const httpRequestMessage = httpRequestDetails.method
     ? [
@@ -64,6 +42,8 @@ export async function logger(
     httpRequestMessage,
   ].join(' | ');
 
+  console.error(`== ${event} : ${logMessage}`);
+
   console[event === 'error' ? 'warn' : 'log'](`== ${event} : ${logMessage}`);
 
   if (env === 'production') {
@@ -83,6 +63,30 @@ export async function logger(
         httpRequestDetails,
       }),
     });
+  }
+}
+
+function formattedMessage(payload: any): string {
+  if (payload instanceof Error) {
+    return `Error: ${payload.message}\nStack: ${payload.stack}`;
+  }
+  switch (typeof payload) {
+    case 'string':
+      return payload;
+    case 'number':
+    case 'boolean':
+      return payload.toString();
+    case 'object':
+      if (payload === null) {
+        return 'null';
+      }
+      try {
+        return JSON.stringify(payload, null, 2);
+      } catch (error) {
+        return 'Circular reference in payload';
+      }
+    default:
+      return `Unsupported type: ${typeof payload}`;
   }
 }
 

@@ -1,16 +1,10 @@
-import React from 'react';
+import Login from '../organisms/Login';
+import AuthLayout from '../templates/AuthLayout';
 
-interface LoginPageProps {
-  onLogin: () => void;
-}
-
-const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+export const LoginPage = () => {
   return (
-    <div>
-      {/* Tu código para el LoginPage */}
-      <button onClick={onLogin}>Login</button>
-    </div>
+    <AuthLayout>
+      <Login />
+    </AuthLayout>
   );
 };
-
-export default LoginPage;

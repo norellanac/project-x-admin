@@ -1,39 +1,74 @@
-import AuthButton from '@/features/auth/components/atoms/AuthButton';
-import TextAtom from '@/features/components/atoms/TextAtom';
-import { Box, Container, Grid } from '@mui/material';
-import { Field, Form, Formik } from 'formik';
+import React, { useCallback, useState } from 'react';
+import { Box, Container, IconButton, Alert } from '@mui/material';
+import Grid from '@mui/material/Grid2'
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { Form, Formik, FormikHelpers } from 'formik';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
-import LanguageSwitcher from '../molecules/LanguajeSwitcher';
-import AuthInputField from '@/features/components/atoms/AuthInputField';
+import { ButtonAtom, InputAtom, TextAtom } from '../../../../components/atoms';
+import { useAppDispatch } from '../../../../hooks/useAppDispatch';
+import { logger } from '../../../../utils/logger';
+import { loginSuccess } from '../../../../redux/slices/authSlice';
+import { LoginValues } from '../../../../types/api/apiRequests';
+import AppLogo from '../../../../components/molecules/AppLogo';
+import { useLoginMutation } from '../../../../services/authApi';
 
-interface LoginProps {
-  onLogin: () => void;
-  onSwitchToSignup: () => void;
-}
-
-const DEFAULT_CREDENTIALS = {
-  username: 'admin',
-  password: 'password123',
-};
-
-const validationSchema = Yup.object({
-  username: Yup.string()
-    .matches(
-      /^[a-zA-Z0-9_]+$/,
-      'Username can only contain letters, numbers, and underscores',
-    )
-    .required('Username is required'),
-
-  password: Yup.string()
-    .min(6, 'Password must be at least 6 characters')
-    .required('Password is required'),
-});
-
-const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToSignup }) => {
+const Login: React.FC = () => {
   const { t } = useTranslation();
+  const dispatch = useAppDispatch();
+  const [login, { isLoading }] = useLoginMutation();
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+
+  const validationSchema = Yup.object({
+    email: Yup.string()
+      .email(t('forms.commons.email'))
+      .required(t('forms.commons.required')),
+    password: Yup.string()
+      .min(6, t('forms.commons.min_length', { min: 6 }))
+      .required(t('forms.commons.required')),
+  });
+
+  const handleLogin = async (values: LoginValues) => {
+    try {
+      const result = await login(values).unwrap();
+      if (result.success) {
+        const { token, user } = result.data;
+        dispatch(loginSuccess({ user, token }));
+        setSuccessMsg(t('auth.login.success'));
+        navigate('/app/home');
+      }
+    } catch (error) {
+      logger('error', error, 'Login.tsx.handleLogin', 'Web');
+      setErrorMsg(error.data.message);
+    }
+  };
+
+  const handleSubmit = async (
+    values: LoginValues,
+    { setSubmitting }: FormikHelpers<LoginValues>,
+  ) => {
+    await handleLogin(values);
+    setSubmitting(false);
+  };
+
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPassword((prev) => !prev);
+  }, []);
+
+  const rightIcon = (
+    <IconButton
+      onClick={togglePasswordVisibility}
+      onMouseDown={(e) => e.preventDefault()}
+      edge="end"
+    >
+      {showPassword ? <VisibilityOff /> : <Visibility />}
+    </IconButton>
+  );
+
 
   return (
     <Container
@@ -49,15 +84,6 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToSignup }) => {
         padding: 0,
       }}
     >
-      <LanguageSwitcher
-        sx={{
-          position: 'absolute',
-          top: 16,
-          right: 75,
-          zIndex: 1000,
-        }}
-      />
-
       <Box
         sx={{
           width: '100%',
@@ -80,44 +106,15 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToSignup }) => {
             alignItems: 'center',
             gap: '10px',
             mb: '30px',
-            width: '181.47px',
-            height: '36.9px',
           }}
         >
-          <TextAtom
-            variant="display"
-            size="large"
-            sx={{
-              color: '#6750A4',
-              fontWeight: 'bold',
-            }}
-          >
-            Workoo
-          </TextAtom>
+          <AppLogo maxWidth="250px" />
         </Box>
         <Box sx={{ height: '100px' }} />
         <Formik
-          initialValues={{ username: '', password: '' }}
+          initialValues={{ email: '', password: '' }}
           validationSchema={validationSchema}
-          onSubmit={async (values, { setSubmitting, setFieldError }) => {
-            try {
-              if (
-                values.username === DEFAULT_CREDENTIALS.username &&
-                values.password === DEFAULT_CREDENTIALS.password
-              ) {
-                onLogin();
-                navigate('/app/home');
-              } else {
-                setFieldError('username', t('loginScreen.invalidCredentials'));
-                setFieldError('password', t('loginScreen.invalidCredentials'));
-              }
-            } catch {
-              setFieldError('username', t('loginScreen.errorOccurred'));
-              setFieldError('password', t('loginScreen.errorOccurred'));
-            } finally {
-              setSubmitting(false);
-            }
-          }}
+          onSubmit={handleSubmit}
         >
           {({ isSubmitting, touched, errors }) => (
             <Form style={{ width: '350px' }}>
@@ -127,48 +124,44 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToSignup }) => {
                 direction="column"
                 justifyContent="center"
               >
-                <Grid item xs={12}>
-                  <Field
-                    as={AuthInputField}
-                    name="username"
+                <Grid size={{ xs: 12 }}>
+                  <InputAtom
+                    name="email"
+                    type="email"
                     variant="underlined"
-                    label={t('loginScreen.usernameLabel')}
-                    placeholder={t('loginScreen.usernamePlaceholder')}
-                    error={touched.username && !!errors.username}
-                    helperText={
-                      touched.username && errors.username
-                        ? t('loginScreen.invalidCredentials')
-                        : ''
-                    }
+                    label={t('auth.login.email')}
+                    placeholder={t('auth.login.email')}
+                    errorMsg={errors.email || errorMsg}
                     fullWidth
                     sx={{ width: '100%', maxWidth: '328px' }}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <Field
-                    as={AuthInputField}
+                <Grid size={{ xs: 12 }}>
+                  <InputAtom
                     name="password"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     variant="underlined"
-                    label={t('loginScreen.passwordLabel')}
-                    placeholder={t('loginScreen.passwordPlaceholder')}
-                    error={touched.password && !!errors.password}
-                    helperText={
-                      touched.password && errors.password
-                        ? t('loginScreen.invalidCredentials')
-                        : ''
-                    }
+                    label={t('auth.login.password')}
+                    placeholder={t('auth.login.password')}
+                    errorMsg={errors.password || errorMsg}
+                    rightIcon={rightIcon}
                     fullWidth
                     sx={{ width: '100%', maxWidth: '328px' }}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <AuthButton
+                <Grid size={{ xs: 12 }}>
+                  {(errorMsg || successMsg) && (
+                    <Alert severity={errorMsg ? 'error' : 'success'}>
+                      {errorMsg || successMsg}
+                    </Alert>
+                  )}
+                </Grid>
+                <Grid size={{ xs: 12 }}>
+                  <ButtonAtom
                     type="submit"
                     variant="filled"
                     fullWidth
                     disabled={isSubmitting}
-                    onClick={onLogin}
                     sx={{
                       mt: 2,
                       width: '100%',
@@ -176,28 +169,26 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToSignup }) => {
                       textTransform: 'none',
                     }}
                   >
-                    {t('loginScreen.login_title_button')}
-                  </AuthButton>
+                    {t('auth.login.title')}
+                  </ButtonAtom>
                 </Grid>
-                <Grid item xs={12}>
-                  <AuthButton
+                <Grid size={{ xs: 12 }}>
+                  <ButtonAtom
                     type="button"
                     variant="text"
                     fullWidth
-                    onClick={() => console.log('Button clicked!')}
+                    onClick={() => navigate('/password-recovery')}
                     sx={{
                       width: '100%',
                       maxWidth: '328px',
                       textTransform: 'none',
                     }}
                   >
-                    {t('loginScreen.forget_password')}
-                  </AuthButton>
+                    {t('auth.login.forgot_password')}
+                  </ButtonAtom>
                 </Grid>
-                <Box sx={{ height: '191px' }} />
-                <Grid
-                  item
-                  xs={12}
+                <Box sx={{ height: '45%' }} />
+                <Grid size={{ xs: 12 }}
                   sx={{
                     display: 'flex',
                     flexDirection: 'row',
@@ -215,15 +206,16 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSwitchToSignup }) => {
                       fontSize: 'inherit',
                     }}
                   >
-                    {t('loginScreen.have_not_account')}
-                    <AuthButton
+                    {t('auth.login.dont_have_account')}
+                    <ButtonAtom
                       type="button"
                       variant="text"
-                      onClick={onSwitchToSignup}
+                      disabled={isSubmitting || isLoading}
+                      onClick={() => navigate('/register')}
                       sx={{ ml: 1, textTransform: 'none', fontSize: 'inherit' }}
                     >
-                      {t('loginScreen.signup_title_button')}
-                    </AuthButton>
+                      {t('auth.login.register')}
+                    </ButtonAtom>
                   </TextAtom>
                 </Grid>
               </Grid>

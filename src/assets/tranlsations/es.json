@@ -1,0 +1,102 @@
+{
+  "app_name": "Reco",
+  "auth": {
+    "login": {
+      "dont_have_account": "¿No tienes una cuenta?",
+      "email": "Correo electrónico",
+      "forgot_password": "¿Olvidaste tu contraseña?",
+      "password": "Contraseña",
+      "register": "Registrarse",
+      "success": "",
+      "title": "Iniciar sesión"
+    },
+    "logout": {
+      "title": ""
+    },
+    "register": {
+      "confirmPasswordLabel": "Confirmar contraseña",
+      "emailLabel": "Correo electrónico",
+      "have_an_account": "¿Ya tienes una cuenta?",
+      "login_title_button": "Iniciar sesión",
+      "passwordLabel": "Contraseña",
+      "signup_success": "",
+      "signup_title_button": "Registrarse"
+    },
+    "slider_intro": {
+      "title_1": "Encuentra al experto que necesitas en pocos minutos.",
+      "title_2": "Ahorra tiempo y dinero al contratar servicios de calidad.",
+      "title_3": "Recibe atención personalizada y soporte al cliente.",
+      "title_4": "Descubre una amplia variedad de servicios a tu alcance."
+    }
+  },
+  "buttonTab": {
+    "favorites": "Guardados",
+    "home": "Inicio",
+    "profile": "Peril",
+    "task": "Mis Trabajos"
+  },
+  "components": {
+    "molecules": {
+      "emptySection": {
+        "description": "Parece que no tienes nada aquí. ¡Vuelve más tarde o crea una nuevo registro!",
+        "title": "Sin registros para mostrar"
+      }
+    }
+  },
+  "errorPage": {
+    "badRequestMessage": "La solicitud es inválida o no puede ser procesada.",
+    "defaultMessage": "Ha ocurrido un error inesperado. Por favor, inténtalo de nuevo más tarde.",
+    "forbiddenMessage": "No tienes permiso para acceder a esta página.",
+    "goHomeButton": "Volver a la página de inicio",
+    "notFoundImageAlt": "Ilustración de página no encontrada",
+    "notFoundMessage": "Lo sentimos, la página que buscas no existe.",
+    "serverErrorMessage": "¡Ups! Algo salió mal en nuestro lado. Por favor, inténtalo de nuevo más tarde.",
+    "unauthorizedMessage": "Necesitas iniciar sesión para acceder a esta página."
+  },
+  "errors": {
+    "minLength": ""
+  },
+  "footer": {
+    "copyright": "Desarrollo web y móvil."
+  },
+  "forms": {
+    "commons": {
+      "email": "El campo deberia ser un email válido",
+      "min_length": "El campo deberia tener al menos {{min}} caracteres",
+      "required": "Este campo es requerido"
+    }
+  },
+  "landing": {
+    "searchForm": {
+      "body": "¡Chatea con 3 profesionales al momento y consigue tu presupuesto ideal!",
+      "clearFilters": "Eliminar filtros",
+      "location": "Ubicación",
+      "modalTitle": "Buscar productos y servicios",
+      "priceRange": "Rango de precios",
+      "search": "Buscar",
+      "serviceInput": "Categoría",
+      "startSearch": "Iniciar búsqueda",
+      "textPlaceholder": "Escribe qué estás buscando...",
+      "title": "¿Qué necesitas?"
+    }
+  },
+  "login": "",
+  "newsletter": {
+    "emailPlaceholder": "Enter your email *",
+    "subscribeButton": "Subscribe",
+    "title": "Subscribe to our Newsletter"
+  },
+  "services": {
+    "searchBar": {
+      "clearFilters": "Limpiar filtros"
+    }
+  },
+  "settingsScreen": {
+    "save_title_button": ""
+  },
+  "validation": {
+    "maxLength": "",
+    "required": ""
+  },
+  "welcome": ""
+}

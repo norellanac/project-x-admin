@@ -2,6 +2,8 @@ import InitialPage from '@/features/auth/components/pages/InitialPage';
 
 import { Navigate, Route, Routes } from 'react-router-dom';
 import AuthenticatedApp from './AuthenticatedApp';
+import { useAppSelector } from '@/hooks/useAppSelector';
+import { selectAuth } from '@/redux/slices/authSlice';
 
 const PrivateRoute = ({
   isAuthenticated,
@@ -14,9 +16,10 @@ const PrivateRoute = ({
 };
 
 const AppRouter: React.FC<{
-  isAuthenticated: boolean;
   onLogin: () => void;
-}> = ({ isAuthenticated, onLogin }) => {
+}> = ({  onLogin }) => {
+  const { isAuthenticated } = useAppSelector(selectAuth);
+  console.error('AppRouter isAuthenticated:', isAuthenticated);
   return (
     <Routes>
       <Route

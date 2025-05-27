@@ -3,20 +3,16 @@ import { Box } from '@mui/material';
 import React from 'react';
 import AuthButton from '../atoms/AuthButton';
 import { useAppSelector } from '@/hooks/useAppSelector';
-import { loginSuccess, selectAuth } from '@/redux/slices/authSlice';
+import { loginSuccess, logout, selectAuth } from '@/redux/slices/authSlice';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
-import { useGetExampleDataQuery } from '@/services/api';
+import { ButtonAtom } from '@/components/atoms';
+import { useTranslation } from 'react-i18next';
 
 const HomePage: React.FC = () => {
-  //http request
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const authState = useAppSelector(selectAuth);
-  const { data } = useGetExampleDataQuery();
-  const handleLogin = () => {
-    // Simulate a login API call
-    const user = { id: '1', name: 'John Doe', email: 'john.doe@example.com' };
-    dispatch(loginSuccess(user));
-  };
+
   return (
     <Box
       sx={{
@@ -32,14 +28,17 @@ const HomePage: React.FC = () => {
         Welcome to the Home Page
       </TextAtom>
       <TextAtom variant="body" size="small">
-       Example data from API {JSON.stringify(data)}
-      </TextAtom>
-      <TextAtom variant="body" size="small">
        {JSON.stringify(authState)}
       </TextAtom>
-      <AuthButton variant="elevated" onClick={handleLogin}>
-        Simulate Auth User
-      </AuthButton>
+      <ButtonAtom
+        title='LogOut'
+        fullWidth
+        variant="filled"
+        onClick={() => dispatch(logout())}
+        sx={{ mt: 2, height: '40px', maxWidth: '328px', textTransform: 'none' }}
+      >
+        {t('auth.logout.title')}
+      </ButtonAtom>
       <TextAtom variant="body" size="small">
         You can navigate to other sections using the sidebar or click on the
         `Workoo` text to return to `home`.

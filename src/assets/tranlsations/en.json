@@ -1,0 +1,102 @@
+{
+  "app_name": "",
+  "auth": {
+    "login": {
+      "dont_have_account": "Don't have an account?",
+      "email": "Email",
+      "forgot_password": "Forgot your password?",
+      "password": "Password",
+      "register": "Register",
+      "success": "",
+      "title": "Login"
+    },
+    "logout": {
+      "title": ""
+    },
+    "register": {
+      "confirmPasswordLabel": "Confirm Password",
+      "emailLabel": "Email",
+      "have_an_account": "Already have an account?",
+      "login_title_button": "Log In",
+      "passwordLabel": "Password",
+      "signup_success": "",
+      "signup_title_button": "Sign Up"
+    },
+    "slider_intro": {
+      "title_1": "Find the expert you need in minutes.",
+      "title_2": "Discover amazing services tailored just for you.",
+      "title_3": "Connect with professionals and get the help you need.",
+      "title_4": "Join our community and start your journey today!"
+    }
+  },
+  "buttonTab": {
+    "favorites": "Favorites",
+    "home": "Home",
+    "profile": "Profile",
+    "task": "Task"
+  },
+  "components": {
+    "molecules": {
+      "emptySection": {
+        "description": "It seems you don't have anything here. Come back later or create a new record!",
+        "title": "No records to show"
+      }
+    }
+  },
+  "errorPage": {
+    "badRequestMessage": "",
+    "defaultMessage": "",
+    "forbiddenMessage": "",
+    "goHomeButton": "Bring me to Home",
+    "notFoundImageAlt": "",
+    "notFoundMessage": "Sorry, the page you're looking for doesn't exist.",
+    "serverErrorMessage": "",
+    "unauthorizedMessage": ""
+  },
+  "errors": {
+    "minLength": ""
+  },
+  "footer": {
+    "copyright": "Web and mobile development."
+  },
+  "forms": {
+    "commons": {
+      "email": "The field should be a valid email",
+      "min_length": "The field should have at least {{min}} characters",
+      "required": "This field is required"
+    }
+  },
+  "landing": {
+    "searchForm": {
+      "body": "Chat with 3 experts instantly and get your perfect quote!",
+      "clearFilters": "Clear Filters",
+      "location": "Location",
+      "modalTitle": "Search Services",
+      "priceRange": "Price range",
+      "search": "Search",
+      "serviceInput": "Service",
+      "startSearch": "Start your search",
+      "textPlaceholder": "Type what you're looking for...",
+      "title": "What do you need?"
+    }
+  },
+  "login": "",
+  "newsletter": {
+    "emailPlaceholder": "Enter your email *",
+    "subscribeButton": "Subscribe",
+    "title": "Subscribe to our Newsletter"
+  },
+  "services": {
+    "searchBar": {
+      "clearFilters": "Clear filters"
+    }
+  },
+  "settingsScreen": {
+    "save_title_button": ""
+  },
+  "validation": {
+    "maxLength": "",
+    "required": ""
+  },
+  "welcome": ""
+}
