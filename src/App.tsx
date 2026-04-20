@@ -14,7 +14,6 @@ import { ThemeProvider } from './styles/contexts/ThemeProvider';
 import i18n from './utils/i18n';
 
 const App: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [themeMode, setThemeMode] = useState<'light' | 'dark'>('light');
 
   const toggleTheme = () => {
@@ -22,7 +21,7 @@ const App: React.FC = () => {
   };
 
   const handleLogin = () => {
-    setIsAuthenticated(true);
+    // Logic for login
   };
 
   return (

@@ -118,8 +118,8 @@ const SearchBar = () => {
               resetForm,
             }) => (
               <Form>
-                <Grid>
-                  <Grid item xs={12} md={6} lg={6}>
+                <Grid container>
+                  <Grid size={{ xs: 12, md: 6, lg: 6 }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                       <TextAtom
                         variant="display"

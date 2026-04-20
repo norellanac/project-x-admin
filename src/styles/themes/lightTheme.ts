@@ -3,6 +3,7 @@ import { textTheme } from './textTheme';
 
 
 export const lightTheme = createTheme({
+  cssVariables: true,
   palette: {
     mode: 'light',
     primary: {

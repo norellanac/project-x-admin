@@ -1,5 +1,4 @@
 import { Component, ReactNode, ErrorInfo } from 'react';
-import PropTypes from 'prop-types';
 import ErrorPage from '../organisms/ErrorPage';
 import CustomError from '../../utils/CustomError';
 

@@ -8,6 +8,7 @@
     "module": "ESNext",
     "skipLibCheck": true,
     "typeRoots": ["./node_modules/@types", "./src/types", "./src/styles/themes"],
+    "ignoreDeprecations": "6.0",
 
     /*Absolute paths*/
     "baseUrl": ".",

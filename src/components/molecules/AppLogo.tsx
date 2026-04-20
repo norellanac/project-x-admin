@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { SxProps, Theme, useTheme } from '@mui/material/styles';
+import { SxProps, Theme } from '@mui/material/styles';
 // import RecoLogo from './../../assets/images/Reco_logo.png';
 import RecoLogo from './../../assets/images/Reco_logo.png';
 import { useNavigate } from 'react-router-dom';

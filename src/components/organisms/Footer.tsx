@@ -14,8 +14,8 @@ const Footer: React.FC = () => {
   return (
     <>
       <Box>
-        <Grid item xs={12} textAlign="center">
-          <Box padding={8}>
+        <Grid size={12} textAlign="center">
+          <Box sx={{ padding: 8 }}>
             <AppLogo maxWidth="250px" />
           </Box>
 
@@ -23,7 +23,7 @@ const Footer: React.FC = () => {
             <IconButton
               href="https://www.instagram.com"
               target="_blank"
-              style={{ color: '#0A142F', zIndex: -1 }}
+              sx={{ color: '#0A142F', zIndex: -1 }}
             >
               <InstagramIcon />
             </IconButton>
@@ -37,14 +37,14 @@ const Footer: React.FC = () => {
             <IconButton
               href="https://www.facebook.com"
               target="_blank"
-              style={{ color: '#0A142F', zIndex: -1 }}
+              sx={{ color: '#0A142F', zIndex: -1 }}
             >
               <FacebookIcon />
             </IconButton>
           </Box>
         </Grid>
 
-        <Grid item xs={12} textAlign="center" mt={3} marginBottom="80px">
+        <Grid size={12} textAlign="center" sx={{ mt: 3, marginBottom: '80px' }}>
           <Typography variant="body2" color="textSecondary">
             © {new Date().getFullYear()} -
             <a
