@@ -1,7 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { persistStore, persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
+import storageImport from 'redux-persist/lib/storage/index.js'; // defaults to localStorage for web
 import { combineReducers } from 'redux';
+
+const storage = (storageImport as any).default || storageImport;
 import authReducer from '../slices/authSlice';
 import serviceStepperReducer from '../slices/serviceStepperSlice';
 import roleSwitcherReducer from '../slices/roleSwitcherSlice';

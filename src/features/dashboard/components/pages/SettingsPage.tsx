@@ -5,7 +5,7 @@ import { Edit as EditIcon } from '@mui/icons-material';
 import {
   Avatar,
   Box,
-  Grid2,
+  Grid,
   IconButton,
   Tab,
   Tabs,
@@ -115,8 +115,8 @@ const SettingsPage: React.FC = () => {
           {({ handleChange, values, errors, touched }) => (
             <Form>
               <Box sx={{ flexGrow: 1 }}>
-                <Grid2 container spacing={2} sx={{ ml: 2 }}>
-                  <Grid2
+                <Grid container spacing={2} sx={{ ml: 2 }}>
+                  <Grid
                     sx={{
                       display: 'flex',
                       flexDirection: 'column',
@@ -147,15 +147,15 @@ const SettingsPage: React.FC = () => {
                     >
                       <EditIcon />
                     </IconButton>
-                  </Grid2>
-                  <Grid2
+                  </Grid>
+                  <Grid
                     container
                     spacing={3}
                     size={{ xs: 12, md: 7, lg: 10 }}
                     alignContent={'center'}
                     justifyContent={'center'}
                   >
-                    <Grid2 size={{ xs: 6, lg: 5 }}>
+                    <Grid size={{ xs: 6, lg: 5 }}>
                       <TextAtom variant={'display'} size={'small'}>
                         <Field
                           fullWidth
@@ -170,8 +170,8 @@ const SettingsPage: React.FC = () => {
                           helperText={touched.name && errors.name}
                         />
                       </TextAtom>
-                    </Grid2>
-                    <Grid2 size={{ xs: 6, lg: 5 }}>
+                    </Grid>
+                    <Grid size={{ xs: 6, lg: 5 }}>
                       <TextAtom variant={'display'} size={'small'}>
                         <Field
                           fullWidth
@@ -186,8 +186,8 @@ const SettingsPage: React.FC = () => {
                           helperText={touched.userName && errors.userName}
                         />
                       </TextAtom>
-                    </Grid2>
-                    <Grid2 size={{ xs: 6, lg: 5 }}>
+                    </Grid>
+                    <Grid size={{ xs: 6, lg: 5 }}>
                       <TextAtom variant={'display'} size={'small'}>
                         <Field
                           fullWidth
@@ -202,8 +202,8 @@ const SettingsPage: React.FC = () => {
                           helperText={touched.email && errors.email}
                         />
                       </TextAtom>
-                    </Grid2>
-                    <Grid2 size={{ xs: 6, lg: 5 }}>
+                    </Grid>
+                    <Grid size={{ xs: 6, lg: 5 }}>
                       <TextAtom variant={'display'} size={'small'}>
                         <Field
                           fullWidth
@@ -218,9 +218,9 @@ const SettingsPage: React.FC = () => {
                           helperText={touched.password && errors.password}
                         />
                       </TextAtom>
-                    </Grid2>
+                    </Grid>
 
-                    <Grid2 size={{ xs: 6, lg: 5 }}>
+                    <Grid size={{ xs: 6, lg: 5 }}>
                       <TextAtom variant={'display'} size={'small'}>
                         <Field
                           fullWidth
@@ -237,8 +237,8 @@ const SettingsPage: React.FC = () => {
                           helperText={touched.dateOfBirth && errors.dateOfBirth}
                         />
                       </TextAtom>
-                    </Grid2>
-                    <Grid2 size={{ xs: 6, lg: 5 }}>
+                    </Grid>
+                    <Grid size={{ xs: 6, lg: 5 }}>
                       <TextAtom variant={'display'} size={'small'}>
                         <Field
                           fullWidth
@@ -258,8 +258,8 @@ const SettingsPage: React.FC = () => {
                           }
                         />
                       </TextAtom>
-                    </Grid2>
-                    <Grid2 size={{ xs: 6, lg: 5 }}>
+                    </Grid>
+                    <Grid size={{ xs: 6, lg: 5 }}>
                       <TextAtom variant={'display'} size={'small'}>
                         <Field
                           fullWidth
@@ -274,8 +274,8 @@ const SettingsPage: React.FC = () => {
                           helperText={touched.phone && errors.phone}
                         />
                       </TextAtom>
-                    </Grid2>
-                    <Grid2 size={{ xs: 6, lg: 5 }}>
+                    </Grid>
+                    <Grid size={{ xs: 6, lg: 5 }}>
                       <TextAtom variant={'display'} size={'small'}>
                         <Field
                           fullWidth
@@ -290,8 +290,8 @@ const SettingsPage: React.FC = () => {
                           helperText={touched.city && errors.city}
                         />
                       </TextAtom>
-                    </Grid2>
-                    <Grid2 size={{ xs: 6, lg: 5 }}>
+                    </Grid>
+                    <Grid size={{ xs: 6, lg: 5 }}>
                       <TextAtom variant={'display'} size={'small'}>
                         <Field
                           fullWidth
@@ -308,8 +308,8 @@ const SettingsPage: React.FC = () => {
                           helperText={touched.postalCode && errors.postalCode}
                         />
                       </TextAtom>
-                    </Grid2>
-                    <Grid2 size={{ xs: 6, lg: 5 }}>
+                    </Grid>
+                    <Grid size={{ xs: 6, lg: 5 }}>
                       <TextAtom variant={'display'} size={'small'}>
                         <Field
                           fullWidth
@@ -324,10 +324,10 @@ const SettingsPage: React.FC = () => {
                           helperText={touched.country && errors.country}
                         />
                       </TextAtom>
-                    </Grid2>
-                  </Grid2>
-                </Grid2>
-                <Grid2
+                    </Grid>
+                  </Grid>
+                </Grid>
+                <Grid
                   container
                   justifyContent="right"
                   alignItems="center"
@@ -335,7 +335,7 @@ const SettingsPage: React.FC = () => {
                   sx={{ fontSize: '17px', mt: 3 }}
                   size={12}
                 >
-                  <Grid2 sx={{ order: { xs: 2, sm: 1 } }}>
+                  <Grid sx={{ order: { xs: 2, sm: 1 } }}>
                     <AuthButton
                       type="submit"
                       variant="filled"
@@ -350,8 +350,8 @@ const SettingsPage: React.FC = () => {
                     >
                       {t('settingsScreen.save_title_button')}
                     </AuthButton>
-                  </Grid2>
-                </Grid2>
+                  </Grid>
+                </Grid>
               </Box>
             </Form>
           )}

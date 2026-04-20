@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { Box, Container, IconButton, Alert } from '@mui/material';
-import Grid from '@mui/material/Grid2'
+import Grid from '@mui/material/Grid'
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { Form, Formik, FormikHelpers } from 'formik';
 import { useTranslation } from 'react-i18next';

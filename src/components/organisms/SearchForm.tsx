@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import {
-  Grid2 as Grid,
+  Grid,
   FormControl,
   IconButton,
   useTheme,

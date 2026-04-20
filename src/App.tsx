@@ -30,7 +30,7 @@ const App: React.FC = () => {
       <Provider store={store}>
         <ThemeProvider themeMode={themeMode} toggleTheme={toggleTheme}>
           <CssBaseline />
-          <AppRouter isAuthenticated={isAuthenticated} onLogin={handleLogin} />
+          <AppRouter onLogin={handleLogin} />
         </ThemeProvider>
       </Provider>
     </I18nextProvider>
