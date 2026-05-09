@@ -7,6 +7,7 @@ const storage = (storageImport as any).default || storageImport;
 import authReducer from '../slices/authSlice';
 import serviceStepperReducer from '../slices/serviceStepperSlice';
 import roleSwitcherReducer from '../slices/roleSwitcherSlice';
+import brandingReducer from '../slices/brandingSlice';
 import { authApi } from '../../services/authApi';
 import { productApi } from '../../services/productApi';
 import { categoryApi } from '../../services/categoryApi';
@@ -15,11 +16,13 @@ import { ordersApi } from '../../services/ordersApi';
 import { locationsApi } from '../../services/locationsApi';
 import { chatApi } from '../../services/chatApi';
 import { mailchimpApi } from '../../services/mailchimpApi';
+import { brandingApi } from '../../services/brandingApi';
 
 const rootReducer = combineReducers({
   auth: authReducer,
   serviceStepper: serviceStepperReducer,
   roleSwitcher: roleSwitcherReducer,
+  branding: brandingReducer,
   [authApi.reducerPath]: authApi.reducer,
   [productApi.reducerPath]: productApi.reducer,
   [categoryApi.reducerPath]: categoryApi.reducer,
@@ -27,7 +30,8 @@ const rootReducer = combineReducers({
   [ordersApi.reducerPath]: ordersApi.reducer,
   [locationsApi.reducerPath]: locationsApi.reducer,
   [chatApi.reducerPath]: chatApi.reducer,
-  [mailchimpApi.reducerPath]: mailchimpApi.reducer, 
+  [mailchimpApi.reducerPath]: mailchimpApi.reducer,
+  [brandingApi.reducerPath]: brandingApi.reducer,
   // Add other reducers here
 });
 
@@ -52,7 +56,8 @@ export const store = configureStore({
       ordersApi.middleware,
       locationsApi.middleware,
       chatApi.middleware,
-      mailchimpApi.middleware
+      mailchimpApi.middleware,
+      brandingApi.middleware
     ),
 });
 

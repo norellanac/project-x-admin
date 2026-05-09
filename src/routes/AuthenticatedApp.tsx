@@ -19,6 +19,7 @@ import ServicesPage from '../features/auth/components/pages/ServicesPage';
 import SuppliersPage from '../features/auth/components/pages/SuppliersPage';
 import SupportPage from '../features/auth/components/pages/SupportPage';
 import UsersPage from '../features/users/pages/UsersPage';
+import BrandingPage from '@/features/branding/pages/BrandingPage';
 
 //Estilos
 import { useThemeContext } from '@/styles/contexts/ThemeProvider';
@@ -50,6 +51,7 @@ const AuthenticatedApp: React.FC = () => {
           <Route path="support" element={<SupportPage />} />
           <Route path="analysis" element={<AnalysisPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="branding" element={<BrandingPage />} />
           <Route path="*" element={<Navigate to="/app/home" />} />
         </Routes>
       </Box>
