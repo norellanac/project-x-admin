@@ -269,6 +269,27 @@ const AuthSidebar = () => {
             </ListItemIcon>
             <ListItemText primary="Settings" />
           </ListItemButton>
+          <ListItemButton
+            component={Link}
+            to="/app/branding"
+            sx={{ position: 'relative' }}
+          >
+            <Box
+              sx={{
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: '8px',
+                backgroundColor: getTabColor('/app/branding'),
+                borderRadius: '0 4px 4px 0',
+              }}
+            />
+            <ListItemIcon sx={{ color: getColor('/app/branding') }}>
+              <SettingsIcon />
+            </ListItemIcon>
+            <ListItemText primary="Branding" />
+          </ListItemButton>
         </List>
       </Box>
     </Drawer>

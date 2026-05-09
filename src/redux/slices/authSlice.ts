@@ -7,16 +7,17 @@ import { User } from '../../types/api/modelTypes';
 
 type AuthState = {
   isAuthenticated: boolean;
-  token: string | null;
+  accessToken: string | null;
+  refreshToken: string | null;
   user: User
   error: string | null;
-  
 };
 
 const initialState: AuthState = {
   isAuthenticated: false,
   user: {} as User,
-  token: null,
+  accessToken: null,
+  refreshToken: null,
   error: null,
 };
 
@@ -26,27 +27,35 @@ const authSlice = createSlice({
   reducers: {
     loginSuccess(state, action: PayloadAction<LoginResponse>) {
       state.isAuthenticated = true;
-      state.user = action.payload.user
-      state.token = action.payload.token;
+      state.user = action.payload.user;
+      state.accessToken = action.payload.accessToken;
+      state.refreshToken = action.payload.refreshToken;
       state.error = null;
     },
     setAuthUserState(state, action: PayloadAction<User>) {
       state.user = action.payload;
     },
+    updateTokens(state, action: PayloadAction<{ accessToken: string; refreshToken: string }>) {
+      state.accessToken = action.payload.accessToken;
+      state.refreshToken = action.payload.refreshToken;
+    },
     loginFailure(state, action: PayloadAction<string>) {
       state.isAuthenticated = false;
       state.user = {} as User;
+      state.accessToken = null;
+      state.refreshToken = null;
       state.error = action.payload;
     },
     logout(state) {
       state.isAuthenticated = false;
       state.user = {} as User;
       state.error = null;
-      state.token = null;
+      state.accessToken = null;
+      state.refreshToken = null;
     },
   },
 });
 
-export const { loginSuccess, setAuthUserState, loginFailure, logout } = authSlice.actions;
+export const { loginSuccess, setAuthUserState, updateTokens, loginFailure, logout } = authSlice.actions;
 export const selectAuth = (state: RootState) => state.auth;
 export default authSlice.reducer;

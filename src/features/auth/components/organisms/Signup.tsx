@@ -51,8 +51,8 @@ const Signup: React.FC = () => {
     try {
       const result = await login(values).unwrap();
       if (result.success) {
-        const { token, user } = result.data;
-        dispatch(loginSuccess({ user, token }));
+        const { accessToken, refreshToken, user } = result.data;
+        dispatch(loginSuccess({ user, accessToken, refreshToken }));
         setSuccessMsg(t('auth.login.success'));
         navigate('/home');
       } else {

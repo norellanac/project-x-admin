@@ -1,5 +1,5 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { ApiResponseType } from '../types/api/apiResponses';
+import { ApiResponseType, LoginResponse } from '../types/api/apiResponses';
 import { LoginValues } from '../types/api/apiRequests';
 import baseQueryWithReauth from './baseQueryWithReauth';
 import { User } from '../types/api/modelTypes';
@@ -9,13 +9,23 @@ export const authApi = createApi({
   baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
     login: builder.mutation<
-      ApiResponseType<{ user: User; token: string; refreshToken: string }>,
+      ApiResponseType<LoginResponse>,
       LoginValues
     >({
       query: (credentials) => ({
         url: 'login/',
         method: 'POST',
         body: credentials,
+      }),
+    }),
+    refreshToken: builder.mutation<
+      ApiResponseType<LoginResponse>,
+      { refreshToken: string }
+    >({
+      query: (body) => ({
+        url: 'refresh-token/',
+        method: 'POST',
+        body,
       }),
     }),
     requestPasswordReset: builder.mutation<void, { email: string }>({
@@ -46,7 +56,7 @@ export const authApi = createApi({
       }),
     }),
     facebookLogin: builder.mutation<
-      ApiResponseType<{ user: User; token: string; refreshToken: string }>,
+      ApiResponseType<LoginResponse>,
       { accessToken: string }
     >({
       query: (body) => ({
@@ -63,6 +73,7 @@ export const authApi = createApi({
 
 export const {
   useLoginMutation,
+  useRefreshTokenMutation,
   useRequestPasswordResetMutation,
   useUpdatePasswordMutation,
   useSignupMutation,

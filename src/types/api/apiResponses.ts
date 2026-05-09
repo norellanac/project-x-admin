@@ -16,8 +16,8 @@ export interface UserResponseType {
 }
 
 export interface LoginResponse {
-  user: UserResponseType;
-  token: string;
+  user: any; // Using any for now as the provided user structure is complex, or ideally link back to User type
+  accessToken: string;
   refreshToken: string;
 }
 
