@@ -9,6 +9,10 @@ import introSliderImg1 from '../../../../assets/images/intro_sliders/intro_1.png
 import introSliderImg2 from '../../../../assets/images/intro_sliders/intro_2.png';
 import introSliderImg3 from '../../../../assets/images/intro_sliders/intro_3.png';
 import introSliderImg4 from '../../../../assets/images/intro_sliders/intro_4.png';
+import { useSelector } from 'react-redux';
+import { selectBranding } from '@/redux/slices/brandingSlice';
+
+const BASE_API_URL = (import.meta.env.VITE_BASE_API_URL || '').replace(/\/$/, '');
 
 
 // i18next-parser-start
@@ -19,7 +23,7 @@ import introSliderImg4 from '../../../../assets/images/intro_sliders/intro_4.png
 // i18next-parser-end
 
 
-const slides = [
+const LOCAL_SLIDES = [
   { title: 'auth.slider_intro.title_1', image: introSliderImg1 },
   { title: 'auth.slider_intro.title_2', image: introSliderImg2 },
   { title: 'auth.slider_intro.title_3', image: introSliderImg3 },
@@ -31,6 +35,14 @@ const IntroSlider: React.FC = () => {
   const theme = useTheme();
   const { palette } = theme;
   const [currentSlide, setCurrentSlide] = useState(0);
+  const { config } = useSelector(selectBranding);
+
+  const slides = config?.sliderImages?.length
+    ? config.sliderImages.map((url, i) => ({
+        title: `auth.slider_intro.title_${(i % 4) + 1}`,
+        image: url.startsWith('http') ? url : `${BASE_API_URL}${url}`,
+      }))
+    : LOCAL_SLIDES;
 
   const handlePrev = () => {
     setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
