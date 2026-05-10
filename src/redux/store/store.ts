@@ -15,7 +15,6 @@ import { userApi } from '../../services/userApi';
 import { ordersApi } from '../../services/ordersApi';
 import { locationsApi } from '../../services/locationsApi';
 import { chatApi } from '../../services/chatApi';
-import { mailchimpApi } from '../../services/mailchimpApi';
 import { brandingApi } from '../../services/brandingApi';
 
 const rootReducer = combineReducers({
@@ -30,7 +29,6 @@ const rootReducer = combineReducers({
   [ordersApi.reducerPath]: ordersApi.reducer,
   [locationsApi.reducerPath]: locationsApi.reducer,
   [chatApi.reducerPath]: chatApi.reducer,
-  [mailchimpApi.reducerPath]: mailchimpApi.reducer,
   [brandingApi.reducerPath]: brandingApi.reducer,
   // Add other reducers here
 });
@@ -56,7 +54,6 @@ export const store = configureStore({
       ordersApi.middleware,
       locationsApi.middleware,
       chatApi.middleware,
-      mailchimpApi.middleware,
       brandingApi.middleware
     ),
 });
