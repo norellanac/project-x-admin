@@ -25,12 +25,16 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 import {
-  useGetBrandingQuery,
   useUpdateBrandingMutation,
   useUploadAssetMutation,
+  useUploadIntroSlideMutation,
   useRemoveSliderImageMutation,
+  useRemoveIntroSlideMutation,
 } from '@/services/brandingApi';
-import { BrandingColors, BrandingConfig, BrandingFeatures } from '@/types/branding';
+import { BrandingColors, BrandingConfig, BrandingFeatures, IntroSlide } from '@/types/branding';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchBranding, selectBranding, setBranding } from '@/redux/slices/brandingSlice';
+import { AppDispatch } from '@/redux/store/store';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -392,12 +396,17 @@ const BrandingPage: React.FC = () => {
     severity: 'success' | 'error';
   }>({ open: false, message: '', severity: 'success' });
 
-  const { data: brandingResponse, isLoading } = useGetBrandingQuery();
+  const dispatch = useDispatch<AppDispatch>();
+  const { config, isLoading } = useSelector(selectBranding);
   const [updateBranding] = useUpdateBrandingMutation();
   const [uploadAsset, { isLoading: isUploading }] = useUploadAssetMutation();
+  const [uploadIntroSlide, { isLoading: isUploadingIntroSlide }] = useUploadIntroSlideMutation();
   const [removeSliderImage] = useRemoveSliderImageMutation();
+  const [removeIntroSlide] = useRemoveIntroSlideMutation();
 
-  const config = brandingResponse?.data ?? null;
+  useEffect(() => {
+    dispatch(fetchBranding());
+  }, [dispatch]);
 
   // ── Tab 1: Identity ──────────────────────────────────────────────────────
   const [identity, setIdentity] = useState({
@@ -412,6 +421,11 @@ const BrandingPage: React.FC = () => {
   const [colorsLight, setColorsLight] = useState<BrandingColors>(EMPTY_COLORS);
   const [colorsDark, setColorsDark] = useState<BrandingColors>(EMPTY_COLORS);
 
+  // ── Tab 2: Intro Slides ───────────────────────────────────────────────────
+  const [introSlides, setIntroSlides] = useState<IntroSlide[]>([]);
+  const [newSlideTitle, setNewSlideTitle] = useState('');
+  const [newSlideSubtitle, setNewSlideSubtitle] = useState('');
+
   // ── Tab 5: Links & Legal ─────────────────────────────────────────────────
   const [legal, setLegal] = useState({
     termsUrl: '',
@@ -421,6 +435,8 @@ const BrandingPage: React.FC = () => {
     legalEmail: '',
     companyAddress: '',
     mailchimpApiUrl: '',
+    appStoreUrl: '',
+    playStoreUrl: '',
   });
 
   // ── Tab 6: Feature Flags ─────────────────────────────────────────────────
@@ -454,12 +470,19 @@ const BrandingPage: React.FC = () => {
     });
     setFeatures(config.features ?? EMPTY_FEATURES);
     setCopyOverrides(config.copyOverrides ?? {});
+    setIntroSlides(config.introSlides ?? []);
+    setLegal((prev) => ({
+      ...prev,
+      appStoreUrl: config.appStoreUrl ?? '',
+      playStoreUrl: config.playStoreUrl ?? '',
+    }));
   }, [config]);
 
   // ── Shared save handler ──────────────────────────────────────────────────
   const handleSave = async (payload: Partial<BrandingConfig>) => {
     try {
-      await updateBranding(payload).unwrap();
+      const result = await updateBranding(payload).unwrap();
+      if (result.data) dispatch(setBranding(result.data));
       setSnackbar({ open: true, message: 'Saved successfully', severity: 'success' });
     } catch {
       setSnackbar({ open: true, message: 'Failed to save. Please try again.', severity: 'error' });
@@ -474,7 +497,8 @@ const BrandingPage: React.FC = () => {
     const formData = new FormData();
     formData.append('file', file);
     try {
-      await uploadAsset({ type, file: formData }).unwrap();
+      const result = await uploadAsset({ type, file: formData }).unwrap();
+      if (result.data) dispatch(setBranding(result.data));
       setSnackbar({ open: true, message: `${type} uploaded successfully`, severity: 'success' });
     } catch {
       setSnackbar({ open: true, message: `Failed to upload ${type}`, severity: 'error' });
@@ -486,7 +510,8 @@ const BrandingPage: React.FC = () => {
     const formData = new FormData();
     formData.append('file', file);
     try {
-      await uploadAsset({ type: 'slider', file: formData }).unwrap();
+      const result = await uploadAsset({ type: 'slider', file: formData }).unwrap();
+      if (result.data) dispatch(setBranding(result.data));
       setSnackbar({ open: true, message: 'Slide added', severity: 'success' });
     } catch {
       setSnackbar({ open: true, message: 'Failed to upload slide', severity: 'error' });
@@ -495,11 +520,46 @@ const BrandingPage: React.FC = () => {
 
   const handleRemoveSlide = async (index: number) => {
     try {
-      await removeSliderImage(index).unwrap();
+      const result = await removeSliderImage(index).unwrap();
+      if (result.data) dispatch(setBranding(result.data));
       setSnackbar({ open: true, message: 'Slide removed', severity: 'success' });
     } catch {
       setSnackbar({ open: true, message: 'Failed to remove slide', severity: 'error' });
     }
+  };
+
+  const handleIntroSlideUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('title', newSlideTitle);
+    formData.append('subtitle', newSlideSubtitle);
+    try {
+      const result = await uploadIntroSlide({ file: formData }).unwrap();
+      if (result.data) { dispatch(setBranding(result.data)); setIntroSlides(result.data.introSlides ?? []); }
+      setNewSlideTitle('');
+      setNewSlideSubtitle('');
+      setSnackbar({ open: true, message: 'Intro slide added', severity: 'success' });
+    } catch {
+      setSnackbar({ open: true, message: 'Failed to upload intro slide', severity: 'error' });
+    }
+  };
+
+  const handleRemoveIntroSlide = async (index: number) => {
+    try {
+      const result = await removeIntroSlide(index).unwrap();
+      if (result.data) { dispatch(setBranding(result.data)); setIntroSlides(result.data.introSlides ?? []); }
+      setSnackbar({ open: true, message: 'Intro slide removed', severity: 'success' });
+    } catch {
+      setSnackbar({ open: true, message: 'Failed to remove intro slide', severity: 'error' });
+    }
+  };
+
+  const handleIntroSlideTextUpdate = async (index: number, updated: Partial<IntroSlide>) => {
+    const next = introSlides.map((s, i) => (i === index ? { ...s, ...updated } : s));
+    setIntroSlides(next);
+    try {
+      const result = await handleSave({ introSlides: next });
+    } catch {}
   };
 
   // ── Loading skeleton ─────────────────────────────────────────────────────
@@ -535,6 +595,7 @@ const BrandingPage: React.FC = () => {
         >
           <Tab label="Identity" />
           <Tab label="Logos & Images" />
+          <Tab label="Intro Slides" />
           <Tab label="Colors: Light" />
           <Tab label="Colors: Dark" />
           <Tab label="Links & Legal" />
@@ -709,8 +770,89 @@ const BrandingPage: React.FC = () => {
             </Box>
           </TabPanel>
 
-          {/* ── Tab 2: Colors Light ────────────────────────────────────── */}
+          {/* ── Tab 2: Intro Slides ────────────────────────────────────── */}
           <TabPanel value={activeTab} index={2}>
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                Current Intro Slides
+              </Typography>
+              {introSlides.length === 0 && (
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  No intro slides configured. Local fallback images are shown.
+                </Typography>
+              )}
+              {introSlides.map((slide, idx) => (
+                <Box key={idx} sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 2, p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
+                  <img
+                    src={buildImageUrl(slide.imageUrl) || ''}
+                    alt={slide.title}
+                    style={{ width: 100, height: 80, objectFit: 'cover', borderRadius: 8 }}
+                  />
+                  <Box sx={{ flex: 1 }}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="Title"
+                      value={slide.title}
+                      onChange={(e) => handleIntroSlideTextUpdate(idx, { title: e.target.value })}
+                      sx={{ mb: 1 }}
+                    />
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="Subtitle (optional)"
+                      value={slide.subtitle || ''}
+                      onChange={(e) => handleIntroSlideTextUpdate(idx, { subtitle: e.target.value })}
+                    />
+                  </Box>
+                  <IconButton color="error" onClick={() => handleRemoveIntroSlide(idx)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
+              ))}
+            </Box>
+            <Divider sx={{ my: 3 }} />
+            <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+              Add New Intro Slide
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 480 }}>
+              <TextField
+                label="Title"
+                value={newSlideTitle}
+                onChange={(e) => setNewSlideTitle(e.target.value)}
+                fullWidth
+              />
+              <TextField
+                label="Subtitle (optional)"
+                value={newSlideSubtitle}
+                onChange={(e) => setNewSlideSubtitle(e.target.value)}
+                fullWidth
+              />
+              <Button
+                component="label"
+                variant="outlined"
+                startIcon={<AddPhotoAlternateIcon />}
+                disabled={isUploadingIntroSlide || !newSlideTitle.trim()}
+              >
+                {isUploadingIntroSlide ? 'Uploading…' : 'Upload slide image'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={(e) => {
+                    const file = e.currentTarget.files?.[0];
+                    if (file) handleIntroSlideUpload(file);
+                  }}
+                />
+              </Button>
+              <Typography variant="caption" color="text.secondary">
+                Enter a title before uploading the image.
+              </Typography>
+            </Box>
+          </TabPanel>
+
+          {/* ── Tab 3: Colors Light ────────────────────────────────────── */}
+          <TabPanel value={activeTab} index={3}>
             <ColorEditor colors={colorsLight} onChange={setColorsLight} />
             <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
               <Button variant="contained" onClick={() => handleSave({ colorsLight })}>
@@ -719,8 +861,8 @@ const BrandingPage: React.FC = () => {
             </Box>
           </TabPanel>
 
-          {/* ── Tab 3: Colors Dark ─────────────────────────────────────── */}
-          <TabPanel value={activeTab} index={3}>
+          {/* ── Tab 4: Colors Dark ─────────────────────────────────────── */}
+          <TabPanel value={activeTab} index={4}>
             <ColorEditor colors={colorsDark} onChange={setColorsDark} />
             <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
               <Button variant="contained" onClick={() => handleSave({ colorsDark })}>
@@ -729,8 +871,8 @@ const BrandingPage: React.FC = () => {
             </Box>
           </TabPanel>
 
-          {/* ── Tab 4: Links & Legal ──────────────────────────────────── */}
-          <TabPanel value={activeTab} index={4}>
+          {/* ── Tab 5: Links & Legal ──────────────────────────────────── */}
+          <TabPanel value={activeTab} index={5}>
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
@@ -796,6 +938,30 @@ const BrandingPage: React.FC = () => {
                   onChange={(e) => setLegal({ ...legal, companyAddress: e.target.value })}
                 />
               </Grid>
+              <Grid size={{ xs: 12 }}>
+                <Divider sx={{ my: 1 }} />
+                <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                  App Store Links
+                </Typography>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  label="App Store URL (iOS)"
+                  value={legal.appStoreUrl}
+                  onChange={(e) => setLegal({ ...legal, appStoreUrl: e.target.value })}
+                  placeholder="https://apps.apple.com/…"
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  label="Play Store URL (Android)"
+                  value={legal.playStoreUrl}
+                  onChange={(e) => setLegal({ ...legal, playStoreUrl: e.target.value })}
+                  placeholder="https://play.google.com/store/apps/…"
+                />
+              </Grid>
             </Grid>
             <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
               <Button variant="contained" onClick={() => handleSave(legal)}>
@@ -804,8 +970,8 @@ const BrandingPage: React.FC = () => {
             </Box>
           </TabPanel>
 
-          {/* ── Tab 5: Feature Flags ───────────────────────────────────── */}
-          <TabPanel value={activeTab} index={5}>
+          {/* ── Tab 6: Feature Flags ───────────────────────────────────── */}
+          <TabPanel value={activeTab} index={6}>
             <Grid container spacing={2}>
               {(
                 [
@@ -839,8 +1005,8 @@ const BrandingPage: React.FC = () => {
             </Box>
           </TabPanel>
 
-          {/* ── Tab 6: Copy Overrides ──────────────────────────────────── */}
-          <TabPanel value={activeTab} index={6}>
+          {/* ── Tab 7: Copy Overrides ──────────────────────────────────── */}
+          <TabPanel value={activeTab} index={7}>
             <CopyOverridesEditor overrides={copyOverrides} onChange={setCopyOverrides} />
             <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
               <Button variant="contained" onClick={() => handleSave({ copyOverrides })}>
