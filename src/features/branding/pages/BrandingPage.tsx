@@ -30,8 +30,10 @@ import {
   useUploadIntroSlideMutation,
   useRemoveSliderImageMutation,
   useRemoveIntroSlideMutation,
+  useApplyPresetMutation,
+  useUpdateFieldLabelsMutation,
 } from '@/services/brandingApi';
-import { BrandingColors, BrandingConfig, BrandingFeatures, IntroSlide } from '@/types/branding';
+import { BrandingColors, BrandingConfig, BrandingFeatures, FieldLabels, IntroSlide, LabelSet, PresetKey } from '@/types/branding';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchBranding, selectBranding, setBranding } from '@/redux/slices/brandingSlice';
 import { AppDispatch } from '@/redux/store/store';
@@ -403,6 +405,8 @@ const BrandingPage: React.FC = () => {
   const [uploadIntroSlide, { isLoading: isUploadingIntroSlide }] = useUploadIntroSlideMutation();
   const [removeSliderImage] = useRemoveSliderImageMutation();
   const [removeIntroSlide] = useRemoveIntroSlideMutation();
+  const [applyPreset, { isLoading: isApplyingPreset }] = useApplyPresetMutation();
+  const [updateFieldLabels] = useUpdateFieldLabelsMutation();
 
   useEffect(() => {
     dispatch(fetchBranding());
@@ -423,6 +427,10 @@ const BrandingPage: React.FC = () => {
 
   // ── Tab 2: Intro Slides ───────────────────────────────────────────────────
   const [introSlides, setIntroSlides] = useState<IntroSlide[]>([]);
+
+  // ── Tab 8: Field Labels ───────────────────────────────────────────────────
+  const [labelLang, setLabelLang] = useState<'en' | 'es'>('en');
+  const [fieldLabels, setFieldLabels] = useState<FieldLabels | null>(null);
   const [newSlideTitle, setNewSlideTitle] = useState('');
   const [newSlideSubtitle, setNewSlideSubtitle] = useState('');
 
@@ -471,6 +479,7 @@ const BrandingPage: React.FC = () => {
     setFeatures(config.features ?? EMPTY_FEATURES);
     setCopyOverrides(config.copyOverrides ?? {});
     setIntroSlides(config.introSlides ?? []);
+    setFieldLabels(config.fieldLabels ?? null);
     setLegal((prev) => ({
       ...prev,
       appStoreUrl: config.appStoreUrl ?? '',
@@ -601,6 +610,7 @@ const BrandingPage: React.FC = () => {
           <Tab label="Links & Legal" />
           <Tab label="Feature Flags" />
           <Tab label="Copy Overrides" />
+          <Tab label="Field Labels" />
         </Tabs>
 
         <Box sx={{ p: 3 }}>
@@ -1013,6 +1023,170 @@ const BrandingPage: React.FC = () => {
                 Save Copy Overrides
               </Button>
             </Box>
+          </TabPanel>
+
+          {/* ── Tab 8: Field Labels ─────────────────────────────────────── */}
+          <TabPanel value={activeTab} index={8}>
+            {/* Preset picker */}
+            <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
+              Platform Preset
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Pick a preset to auto-fill all labels. You can then override individual fields below.
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 4 }}>
+              {(['services_marketplace', 'rental', 'rideshare', 'ecommerce'] as const).map((p) => {
+                const labels: Record<string, string> = {
+                  services_marketplace: '🔧 Services Marketplace',
+                  rental: '🏠 Rental / Airbnb',
+                  rideshare: '🚗 Rideshare / Uber',
+                  ecommerce: '🛒 E-commerce',
+                };
+                const isActive = fieldLabels?.preset === p;
+                return (
+                  <Button
+                    key={p}
+                    variant={isActive ? 'contained' : 'outlined'}
+                    disabled={isApplyingPreset}
+                    onClick={async () => {
+                      const result = await applyPreset({ preset: p }).unwrap();
+                      if (result.data) {
+                        dispatch(setBranding(result.data));
+                        setFieldLabels(result.data.fieldLabels ?? null);
+                      }
+                      setSnackbar({ open: true, message: `Preset "${labels[p]}" applied`, severity: 'success' });
+                    }}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    {labels[p]}
+                  </Button>
+                );
+              })}
+            </Box>
+
+            {fieldLabels && (
+              <>
+                <Divider sx={{ mb: 3 }} />
+                {/* Language toggle */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+                  <Typography variant="subtitle2">Edit language:</Typography>
+                  <Button
+                    size="small"
+                    variant={labelLang === 'en' ? 'contained' : 'outlined'}
+                    onClick={() => setLabelLang('en')}
+                    sx={{ textTransform: 'none', minWidth: 48 }}
+                  >EN</Button>
+                  <Button
+                    size="small"
+                    variant={labelLang === 'es' ? 'contained' : 'outlined'}
+                    onClick={() => setLabelLang('es')}
+                    sx={{ textTransform: 'none', minWidth: 48 }}
+                  >ES</Button>
+                </Box>
+
+                {/* ProductService labels */}
+                <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                  Product / Service labels
+                </Typography>
+                <Grid container spacing={2} sx={{ mb: 4 }}>
+                  {(Object.keys(fieldLabels.productService) as (keyof typeof fieldLabels.productService)[]).map((key) => (
+                    <Grid key={key} size={{ xs: 12, sm: 6, md: 4 }}>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        label={key}
+                        value={(fieldLabels.productService[key] as LabelSet)[labelLang]}
+                        onChange={(e) => setFieldLabels({
+                          ...fieldLabels,
+                          productService: {
+                            ...fieldLabels.productService,
+                            [key]: { ...fieldLabels.productService[key], [labelLang]: e.target.value },
+                          },
+                        })}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+
+                {/* Order labels */}
+                <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                  Order / Booking labels
+                </Typography>
+                <Grid container spacing={2} sx={{ mb: 2 }}>
+                  {(['entityName','entityNamePlural','totalAmount','startDate','endDate','comment','quantity','unitPrice','discount','charge'] as const).map((key) => (
+                    <Grid key={key} size={{ xs: 12, sm: 6, md: 4 }}>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        label={key}
+                        value={(fieldLabels.order[key] as LabelSet)[labelLang]}
+                        onChange={(e) => setFieldLabels({
+                          ...fieldLabels,
+                          order: { ...fieldLabels.order, [key]: { ...fieldLabels.order[key], [labelLang]: e.target.value } },
+                        })}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+
+                {/* Order actions */}
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>Actions</Typography>
+                <Grid container spacing={2} sx={{ mb: 2 }}>
+                  {(['create','cancel','confirm'] as const).map((key) => (
+                    <Grid key={key} size={{ xs: 12, sm: 4 }}>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        label={`Action: ${key}`}
+                        value={fieldLabels.order.actions[key][labelLang]}
+                        onChange={(e) => setFieldLabels({
+                          ...fieldLabels,
+                          order: { ...fieldLabels.order, actions: { ...fieldLabels.order.actions, [key]: { ...fieldLabels.order.actions[key], [labelLang]: e.target.value } } },
+                        })}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+
+                {/* Order statuses */}
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>Statuses</Typography>
+                <Grid container spacing={2} sx={{ mb: 3 }}>
+                  {(['pending','confirmed','inProgress','completed','cancelled'] as const).map((key) => (
+                    <Grid key={key} size={{ xs: 12, sm: 6, md: 4 }}>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        label={`Status: ${key}`}
+                        value={fieldLabels.order.statuses[key][labelLang]}
+                        onChange={(e) => setFieldLabels({
+                          ...fieldLabels,
+                          order: { ...fieldLabels.order, statuses: { ...fieldLabels.order.statuses, [key]: { ...fieldLabels.order.statuses[key], [labelLang]: e.target.value } } },
+                        })}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <Button
+                    variant="contained"
+                    onClick={async () => {
+                      const result = await updateFieldLabels({ fieldLabels }).unwrap();
+                      if (result.data) dispatch(setBranding(result.data));
+                      setSnackbar({ open: true, message: 'Field labels saved', severity: 'success' });
+                    }}
+                  >
+                    Save Field Labels
+                  </Button>
+                </Box>
+              </>
+            )}
+
+            {!fieldLabels && (
+              <Typography variant="body2" color="text.secondary">
+                Select a preset above to start configuring labels.
+              </Typography>
+            )}
           </TabPanel>
         </Box>
       </Paper>
