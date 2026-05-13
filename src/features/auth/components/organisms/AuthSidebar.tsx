@@ -1,5 +1,6 @@
 import TextAtom from '@/features/components/atoms/TextAtom';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import BrushOutlinedIcon from '@mui/icons-material/BrushOutlined';
 import GradeIcon from '@mui/icons-material/Grade';
 import HomeIcon from '@mui/icons-material/Home';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
@@ -18,10 +19,13 @@ import {
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { Link, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { selectBranding } from '@/redux/slices/brandingSlice';
 
 const AuthSidebar = () => {
   const theme = useTheme();
   const location = useLocation();
+  const { config } = useSelector(selectBranding);
 
   const getColor = (path: string): string => {
     return location.pathname === path
@@ -68,7 +72,7 @@ const AuthSidebar = () => {
                 fontWeight: 700,
               }}
             >
-              Workoo
+              {config?.appName || 'Admin Panel'}
             </TextAtom>
           </ListItemButton>
 
@@ -286,7 +290,7 @@ const AuthSidebar = () => {
               }}
             />
             <ListItemIcon sx={{ color: getColor('/app/branding') }}>
-              <SettingsIcon />
+              <BrushOutlinedIcon />
             </ListItemIcon>
             <ListItemText primary="Branding" />
           </ListItemButton>

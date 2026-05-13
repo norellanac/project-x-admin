@@ -1,25 +1,27 @@
-import React, { useState } from 'react';
-import { Box, Grid, Button, Typography, CircularProgress, Paper, Divider } from '@mui/material';
-import { Formik, Form, Field } from 'formik';
-import * as Yup from 'yup';
-import { useGetBrandingQuery, useUpdateBrandingMutation } from '@/services/brandingApi';
+import React from 'react';
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Divider,
+  Paper,
+  Typography,
+} from '@mui/material';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectBranding, setBranding } from '@/redux/slices/brandingSlice';
+import { useUpdateBrandingMutation, useUploadAssetMutation } from '@/services/brandingApi';
 import TextAtom from '@/features/components/atoms/TextAtom';
-import AuthInputField from '@/features/components/atoms/AuthInputField';
+import { AppDispatch } from '@/redux/store/store';
+import { useNavigate } from 'react-router-dom';
 
-const validationSchema = Yup.object().shape({
-  projectName: Yup.string().required('Project Name is required'),
-  primaryColor: Yup.string()
-    .matches(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, 'Invalid hex color')
-    .required('Primary Color is required'),
-  secondaryColor: Yup.string()
-    .matches(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, 'Invalid hex color')
-    .required('Secondary Color is required'),
-});
+const BASE_API_URL = (import.meta.env.VITE_BASE_API_URL || '').replace(/\/$/, '');
 
 const BrandingSettings: React.FC = () => {
-  const { data: branding, isLoading, isError } = useGetBrandingQuery();
+  const { config, isLoading } = useSelector(selectBranding);
+  const dispatch = useDispatch<AppDispatch>();
   const [updateBranding, { isLoading: isUpdating }] = useUpdateBrandingMutation();
-  const [previewLogo, setPreviewLogo] = useState<string | null>(null);
+  const [uploadAsset, { isLoading: isUploading }] = useUploadAssetMutation();
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -29,175 +31,136 @@ const BrandingSettings: React.FC = () => {
     );
   }
 
-  const initialValues = {
-    projectName: branding?.projectName || '',
-    primaryColor: branding?.primaryColor || '#000000',
-    secondaryColor: branding?.secondaryColor || '#ffffff',
-    logo: null as File | null,
+  const logoSrc = config?.logoUrl
+    ? config.logoUrl.startsWith('http')
+      ? config.logoUrl
+      : `${BASE_API_URL}${config.logoUrl}`
+    : null;
+
+  const handleLogoUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const result = await uploadAsset({ type: 'logo', file: formData }).unwrap();
+      if (result.data) dispatch(setBranding(result.data));
+    } catch {
+      // handled silently — full editing in BrandingPage
+    }
   };
 
-  const handleSubmit = async (values: typeof initialValues) => {
-    const formData = new FormData();
-    formData.append('projectName', values.projectName);
-    formData.append('primaryColor', values.primaryColor);
-    formData.append('secondaryColor', values.secondaryColor);
-    if (values.logo) {
-      formData.append('logo', values.logo);
-    }
-
+  const handleColorSave = async (key: 'primary' | 'secondary', value: string) => {
+    if (!config) return;
+    const updated = {
+      colorsLight: { ...config.colorsLight, [key]: value },
+    };
     try {
-      await updateBranding(formData).unwrap();
-      alert('Branding updated successfully!');
-    } catch (err) {
-      console.error('Failed to update branding:', err);
-      alert('Failed to update branding.');
+      const result = await updateBranding(updated).unwrap();
+      if (result.data) dispatch(setBranding(result.data));
+    } catch {
+      // handled silently
     }
   };
 
   return (
     <Box>
-      <TextAtom variant="headline" size="medium" sx={{ mb: 3 }}>
-        Branding Settings
-      </TextAtom>
-      
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-        enableReinitialize
-      >
-        {({ setFieldValue, values, errors, touched }) => (
-          <Form>
-            <Grid container spacing={4}>
-              <Grid item xs={12} md={6}>
-                <Box sx={{ mb: 2 }}>
-                  <Field
-                    as={AuthInputField}
-                    name="projectName"
-                    label="Project Name"
-                    placeholder="Enter Project Name"
-                    variant="outlined"
-                    error={touched.projectName && !!errors.projectName}
-                    errorMsg={touched.projectName ? (errors.projectName as string) : ''}
-                  />
-                </Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+        <TextAtom variant="headline" size="medium">Branding Overview</TextAtom>
+        <Button
+          variant="contained"
+          size="small"
+          onClick={() => navigate('/app/branding')}
+          sx={{ textTransform: 'none' }}
+        >
+          Open full editor
+        </Button>
+      </Box>
 
-                <Box sx={{ mb: 2 }}>
-                  <Field
-                    as={AuthInputField}
-                    name="primaryColor"
-                    label="Primary Color"
-                    placeholder="#000000"
-                    variant="outlined"
-                    error={touched.primaryColor && !!errors.primaryColor}
-                    errorMsg={touched.primaryColor ? (errors.primaryColor as string) : ''}
-                  />
-                  <Box
-                    sx={{
-                      width: '40px',
-                      height: '40px',
-                      backgroundColor: values.primaryColor,
-                      mt: 1,
-                      border: '1px solid #ccc',
-                      borderRadius: '4px'
-                    }}
-                  />
-                </Box>
+      <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+        {/* Logo */}
+        <Paper sx={{ p: 2, minWidth: 200 }}>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>Logo</Typography>
+          {logoSrc ? (
+            <img src={logoSrc} alt="logo" style={{ maxWidth: 160, maxHeight: 80, objectFit: 'contain' }} />
+          ) : (
+            <Typography variant="body2" color="text.secondary">No logo uploaded</Typography>
+          )}
+          <Button
+            component="label"
+            size="small"
+            variant="outlined"
+            disabled={isUploading}
+            sx={{ mt: 1, textTransform: 'none', display: 'block' }}
+          >
+            {isUploading ? <CircularProgress size={16} /> : 'Change logo'}
+            <input
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={(e) => {
+                const file = e.currentTarget.files?.[0];
+                if (file) handleLogoUpload(file);
+              }}
+            />
+          </Button>
+        </Paper>
 
-                <Box sx={{ mb: 2 }}>
-                  <Field
-                    as={AuthInputField}
-                    name="secondaryColor"
-                    label="Secondary Color"
-                    placeholder="#ffffff"
-                    variant="outlined"
-                    error={touched.secondaryColor && !!errors.secondaryColor}
-                    errorMsg={touched.secondaryColor ? (errors.secondaryColor as string) : ''}
-                  />
-                  <Box
-                    sx={{
-                      width: '40px',
-                      height: '40px',
-                      backgroundColor: values.secondaryColor,
-                      mt: 1,
-                      border: '1px solid #ccc',
-                      borderRadius: '4px'
-                    }}
-                  />
-                </Box>
-              </Grid>
-
-              <Grid item xs={12} md={6}>
-                <Typography variant="subtitle1" sx={{ mb: 1 }}>Logo</Typography>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(event) => {
-                    const file = event.currentTarget.files?.[0];
-                    if (file) {
-                      setFieldValue('logo', file);
-                      setPreviewLogo(URL.createObjectURL(file));
-                    }
-                  }}
-                  style={{ marginBottom: '16px', display: 'block' }}
+        {/* Colors */}
+        <Paper sx={{ p: 2, minWidth: 240 }}>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>Colors (light theme)</Typography>
+          <Divider sx={{ mb: 2 }} />
+          {(['primary', 'secondary'] as const).map((key) => (
+            <Box key={key} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <Box
+                component="label"
+                sx={{ width: 32, height: 32, borderRadius: 1, border: '1px solid', borderColor: 'divider', overflow: 'hidden', cursor: 'pointer' }}
+              >
+                <Box
+                  component="input"
+                  type="color"
+                  value={config?.colorsLight?.[key] || '#6750A4'}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleColorSave(key, e.target.value)
+                  }
+                  sx={{ width: '100%', height: '100%', border: 'none', padding: 0, cursor: 'pointer' }}
                 />
-                {(previewLogo || branding?.logoUrl) && (
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="caption" display="block">Logo Preview:</Typography>
-                    <img 
-                      src={previewLogo || branding?.logoUrl} 
-                      alt="Logo Preview" 
-                      style={{ maxWidth: '200px', maxHeight: '100px', objectFit: 'contain', border: '1px dashed #ccc', padding: '8px' }} 
-                    />
-                  </Box>
-                )}
+              </Box>
+              <Typography variant="body2" sx={{ textTransform: 'capitalize' }}>{key}</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {config?.colorsLight?.[key] || '—'}
+              </Typography>
+            </Box>
+          ))}
+          {isUpdating && <CircularProgress size={16} sx={{ mt: 1 }} />}
+        </Paper>
 
-                <Paper sx={{ p: 2, bgcolor: '#f5f5f5', border: '1px solid #ddd' }}>
-                  <Typography variant="subtitle2" sx={{ mb: 1 }}>UI Elements Preview</Typography>
-                  <Divider sx={{ mb: 2 }} />
-                  <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                    <Button 
-                      variant="contained" 
-                      sx={{ bgcolor: values.primaryColor, '&:hover': { bgcolor: values.primaryColor, opacity: 0.9 } }}
-                    >
-                      Primary Button
-                    </Button>
-                    <Button 
-                      variant="outlined" 
-                      sx={{ color: values.secondaryColor, borderColor: values.secondaryColor, '&:hover': { borderColor: values.secondaryColor, opacity: 0.9 } }}
-                    >
-                      Secondary Button
-                    </Button>
-                  </Box>
-                  <Box sx={{ mt: 2, p: 1, borderLeft: `4px solid ${values.primaryColor}` }}>
-                    <TextAtom variant="body" size="medium">
-                      Sample text with primary accent border.
-                    </TextAtom>
-                  </Box>
-                </Paper>
-              </Grid>
+        {/* App Info */}
+        <Paper sx={{ p: 2, minWidth: 200 }}>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>App Identity</Typography>
+          <Divider sx={{ mb: 1 }} />
+          <Typography variant="body2"><strong>Name:</strong> {config?.appName || '—'}</Typography>
+          <Typography variant="body2"><strong>Tagline:</strong> {config?.tagline || '—'}</Typography>
+          <Typography variant="body2"><strong>Font:</strong> {config?.fontFamily || '—'}</Typography>
+        </Paper>
 
-              <Grid item xs={12}>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={isUpdating}
-                  sx={{
-                    bgcolor: '#9b76ff',
-                    color: '#fff',
-                    '&:hover': { bgcolor: '#6750a4' },
-                    textTransform: 'none',
-                    px: 4,
-                    py: 1.5,
-                  }}
-                >
-                  {isUpdating ? <CircularProgress size={24} color="inherit" /> : 'Save Branding Changes'}
-                </Button>
-              </Grid>
-            </Grid>
-          </Form>
-        )}
-      </Formik>
+        {/* Feature Flags */}
+        <Paper sx={{ p: 2, minWidth: 200 }}>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>Feature Flags</Typography>
+          <Divider sx={{ mb: 1 }} />
+          {config?.features
+            ? Object.entries(config.features).map(([flag, enabled]) => (
+                <Box key={flag} sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                  <Typography variant="body2">{flag}</Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: enabled ? 'success.main' : 'text.disabled', fontWeight: 600 }}
+                  >
+                    {enabled ? 'ON' : 'OFF'}
+                  </Typography>
+                </Box>
+              ))
+            : <Typography variant="body2" color="text.secondary">Not loaded</Typography>}
+        </Paper>
+      </Box>
     </Box>
   );
 };
